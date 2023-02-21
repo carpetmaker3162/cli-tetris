@@ -12,21 +12,21 @@ fd = sys.stdin.fileno()
 old_settings = termios.tcgetattr(fd)
 
 event_queue = []
-BLOCK = "██"
+BLOCK = "  "
 
 def colored_block(ansi):
     return f"{ansi}{BLOCK}{Fmt.end}"
 
 TEXTURE = {
     0: ". ",
-    1: colored_block(Fmt.red_text),
-    2: colored_block(Fmt.yellow_text),
-    3: colored_block(Fmt.green_text),
-    4: colored_block(Fmt.cyan_text),
-    5: colored_block(Fmt.blue_text),
-    6: colored_block(Fmt.magenta_text),
-    7: colored_block(Fmt.white_text),
-    8: colored_block(Fmt.gray_text),
+    1: colored_block(Fmt.red_highlight_text),
+    2: colored_block(Fmt.yellow_highlight_text),
+    3: colored_block(Fmt.green_highlight_text),
+    4: colored_block(Fmt.cyan_highlight_text),
+    5: colored_block(Fmt.blue_highlight_text),
+    6: colored_block(Fmt.magenta_highlight_text),
+    7: colored_block(Fmt.light_gray_highlight_text),
+    8: colored_block(Fmt.gray_highlight_text),
 }
 
 # 0001111000
