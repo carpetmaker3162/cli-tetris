@@ -102,9 +102,9 @@ class Game:
             log(self.active_block.squares, end="\n\n")
             self.draw_block(self.active_block)
         else:
-            # for br, bc in self.active_block.squares:
-            #     self.grid[br][bc] = 0
-            # self.grid = self.apply_gravity(self.grid, self.active_block)
+            for br, bc in self.active_block.squares:
+                self.grid[br][bc] = 0
+            self.grid = self.apply_gravity(self.grid, self.active_block)
             self.draw_block(self.active_block)
     
     def move_block(self, block: Block, newpos: list=None, displacement: tuple=(0, 0)):
