@@ -109,15 +109,14 @@ class Game:
             r, c = new_position[i]
             new_position[i] = (r+dy, c+dx)
         
-        for r, c in block.squares:
-            self.grid[r][c] = 0
-        
         for r, c in new_position:
-            if not 0<=r<self.height and 0<=c<self.width:
+            if not (0<=r<self.height and 0<=c<self.width):
                 return -1
             elif self.grid[r][c] != 0 and (r, c) not in block.squares:
                 return -1
         
+        for r, c in block.squares:
+            self.grid[r][c] = 0
         
         block.squares = new_position[:]
         return 0
