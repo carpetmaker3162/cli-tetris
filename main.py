@@ -66,7 +66,7 @@ class Block:
         assert block in range(1, 5)
         assert color in range(1, 9)
 
-        self.squares = BLOCKS[block]
+        self.squares = BLOCKS[block][:]
         self.id = block
         self.color = color
     
@@ -86,12 +86,13 @@ class Game:
 
     def refresh_scene(self):
         if not self.block_can_fall(self.grid, self.active_block):
-            #for br, bc in self.next_block.squares:
-            #    self.grid[br][bc] = self.next_block.color
             self.active_block = Block(self.next_block.id, self.next_block.color)
             self.next_block = Block.random()
+            log(self.active_block.squares, end="\n\n")
             self.draw_block(self.active_block)
         else:
+            for br, bc in self.active_block.squares:
+                self.grid[br][bc] = 0
             self.grid = self.apply_gravity(self.grid, self.active_block)
             self.draw_block(self.active_block)
     
@@ -111,10 +112,7 @@ class Game:
         new_grid = [x[:] for x in grid[:]]
         # new_block = [x[:] for x in active_block.squares[:]]
         for i, block in enumerate(active_block.squares):
-            br, bc = block
-            new_grid[br][bc] = 0
             active_block.squares[i] = (active_block.squares[i][0] + 1, active_block.squares[i][1])
-        
         
         return new_grid
     
