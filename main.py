@@ -70,7 +70,7 @@ def process_keyboard_events(q):
 
 class Block:
     def __init__(self, block: int, color: int) -> None:
-        assert block in range(1, 5)
+        assert block in range(0, 5)
         assert color in range(1, 9)
 
         self.squares = BLOCKS[block][:]
@@ -80,7 +80,7 @@ class Block:
     
     @classmethod
     def random(cls):
-        return cls(random.randrange(1, 5), random.randrange(1, 9))
+        return cls(random.randrange(0, 5), random.randrange(1, 9))
     
     def update_centre(self):
         self.centre = self.squares[0]
@@ -99,13 +99,16 @@ class Game:
         if not self.block_can_fall(self.grid, self.active_block):
             self.active_block = Block(self.next_block.id, self.next_block.color)
             self.next_block = Block.random()
-            log(self.active_block.squares, end="\n\n")
+            for br, bc in self.active_block.squares:
+                if self.grid[br][bc] != 0:
+                    return -1
             self.draw_block(self.active_block)
         else:
             for br, bc in self.active_block.squares:
                 self.grid[br][bc] = 0
             self.grid = self.apply_gravity(self.grid, self.active_block)
             self.draw_block(self.active_block)
+        return 0
     
     def move_block(self, block: Block, newpos: list=None, displacement: tuple=(0, 0)):
         dy, dx = displacement
@@ -221,9 +224,11 @@ if __name__ == "__main__":
                 sys.stdout.flush()
             
             if time.time() - last_update > 0.2:
-                tetris.refresh_scene()
+                status = tetris.refresh_scene()
                 tetris.print()
                 last_update = time.time()
+                if status == -1:
+                    break
 
     except Exception as e:
         raise e
