@@ -76,7 +76,6 @@ class Game:
             r = self.height - 1
             while r > 0:
                 if all([x != 0 for x in self.grid[r]]):
-                    log("hi")
                     self.remove_row(r)
                     continue
                 r -= 1 
