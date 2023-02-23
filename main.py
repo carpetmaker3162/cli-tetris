@@ -39,6 +39,13 @@ BLOCKS = { # first coordinate is centre of block
     4: [(0, 5), (0, 4), (0, 6), (1, 5)], # T
 }
 
+POINTS_GIVEN = {
+    1: 40,
+    2: 100,
+    3: 300,
+    4: 1200,
+}
+
 def process_keyboard_events(q):
     while True:
         q.append(getch())
@@ -67,6 +74,7 @@ class Game:
         self.grid = [[0 for i in range(self.width)] for i in range(self.height)]
         self.active_block = Block.random() # collection of row #'s and col #'s
         self.next_block = Block.random()
+        self.score = 0
         for br, bc in self.active_block.squares:
             self.grid[br][bc] = self.active_block.color
 
@@ -74,11 +82,14 @@ class Game:
         if not self.block_can_fall(self.grid, self.active_block):
             # check for filled rows
             r = self.height - 1
+            rows_cleared = 0
             while r > 0:
                 if all([x != 0 for x in self.grid[r]]):
+                    rows_cleared += 1
                     self.remove_row(r)
                     continue
                 r -= 1 
+            self.score += POINTS_GIVEN.get(rows_cleared, 0)
             self.active_block = Block(self.next_block.id, self.next_block.color)
             self.next_block = Block.random()
             for br, bc in self.active_block.squares:
@@ -171,6 +182,7 @@ class Game:
     
     def print(self):
         print("\033[H", end="\n\r")
+        print(self.score, end="\n\r")
         buf = str()
         for r, row in enumerate(self.grid):
             for c, cell in enumerate(row):
