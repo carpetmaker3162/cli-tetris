@@ -4,6 +4,7 @@ import random
 import os
 import termios
 import time
+import math
 from utils import getch
 from utils import Fmt
 from utils import Controls as Ctrls
@@ -46,16 +47,21 @@ TEXTURE = {
 # 0000111000
 # 0000010000
 
+# 0 0 0 1 1 1 1 0 0 0
+# 0 0 0 1 1 1 1 0 0 0
+# 0 0 0 1 1 1 1 0 0 0
+# 0 0 0 1 1 1 1 0 0 0
+
 def log(content="", end: str="\n"):
     with open("debug_logs.txt", "a") as f:
         f.write(str(content) + end)
 
-BLOCKS = {
-    0: [(0, 3), (0, 4), (0, 5), (0, 6)], # straight
-    1: [(0, 4), (0, 5), (1, 4), (1, 5)], # square
-    2: [(0, 4), (1, 4), (2, 4), (2, 5)], # L
-    3: [(0, 4), (1, 4), (1, 5), (2, 5)], # skew
-    4: [(0, 4), (0, 5), (0, 6), (1, 5)], # T
+BLOCKS = { # first coordinate is centre of block
+    0: [(0, 4), (0, 5), (1, 4), (1, 5)], # square
+    1: [(0, 4), (0, 3), (0, 5), (0, 6)], # straight
+    2: [(1, 4), (0, 4), (2, 4), (2, 5)], # L
+    3: [(1, 5), (0, 4), (1, 4), (2, 5)], # skew
+    4: [(0, 5), (0, 4), (0, 6), (1, 5)], # T
 }
 
 def process_keyboard_events(q):
@@ -70,10 +76,14 @@ class Block:
         self.squares = BLOCKS[block][:]
         self.id = block
         self.color = color
+        self.centre = self.squares[0]
     
     @classmethod
     def random(cls):
         return cls(random.randrange(1, 5), random.randrange(1, 9))
+    
+    def update_centre(self):
+        self.centre = self.squares[0]
 
 class Game:
     def __init__(self) -> None:
@@ -92,9 +102,9 @@ class Game:
             log(self.active_block.squares, end="\n\n")
             self.draw_block(self.active_block)
         else:
-            for br, bc in self.active_block.squares:
-                self.grid[br][bc] = 0
-            self.grid = self.apply_gravity(self.grid, self.active_block)
+            # for br, bc in self.active_block.squares:
+            #     self.grid[br][bc] = 0
+            # self.grid = self.apply_gravity(self.grid, self.active_block)
             self.draw_block(self.active_block)
     
     def move_block(self, block: Block, newpos: list=None, displacement: tuple=(0, 0)):
@@ -121,24 +131,51 @@ class Game:
         block.squares = new_position[:]
         return 0
     
+    def rotate_block(self, block: Block): # times cw
+        block.update_centre()
+        oy, ox = block.centre
+        localspace_squares = block.squares[:]
+        globalspace_squares = []
+        for i, sq in enumerate(localspace_squares): # convert to localspace
+            y, x = sq
+            localspace_squares[i] = (y-oy, x-ox)
+        for bx, by in localspace_squares: # calculate new positions in localspace
+            nx = -by
+            ny = bx
+            globalspace_squares.append((nx, ny))
+        for i, sq in enumerate(globalspace_squares): # convert to globalspace and check
+            y, x = sq
+            ny, nx = y+oy, x+ox
+            if not (0<=ny<self.height and 0<=nx<self.width):
+                return -1
+            elif self.grid[ny][nx] != 0 and (ny, nx) not in block.squares:
+                return -1
+            globalspace_squares[i] = (ny, nx)
+        for r, c in block.squares:
+            self.grid[r][c] = 0
+        
+        block.squares = globalspace_squares[:]
+        block.update_centre()
+        return 0
+    
     def draw_block(self, block: Block):
         for br, bc in block.squares:
             self.grid[br][bc] = block.color
     
-    def block_can_fall(self, grid, active_block: Block):
-        for br, bc in active_block.squares:
+    def block_can_fall(self, grid, block: Block):
+        for br, bc in block.squares:
             if br == self.height - 1:
                 return False
-            elif grid[br+1][bc] != 0 and all([br > r for r, c in active_block.squares if c == bc and r != br]):
+            elif grid[br+1][bc] != 0 and all([br > r for r, c in block.squares if c == bc and r != br]):
                 return False
         return True
 
-    def apply_gravity(self, grid, active_block: Block): # apply gravity to a grid
+    def apply_gravity(self, grid, block: Block): # apply gravity to a grid
         new_grid = [x[:] for x in grid[:]]
         # new_block = [x[:] for x in active_block.squares[:]]
-        for i, block in enumerate(active_block.squares):
-            active_block.squares[i] = (active_block.squares[i][0] + 1, active_block.squares[i][1])
-        
+        for i, _ in enumerate(block.squares):
+            block.squares[i] = (block.squares[i][0] + 1, block.squares[i][1])
+        block.update_centre()
         return new_grid
     
     def print(self):
@@ -174,11 +211,16 @@ if __name__ == "__main__":
                 elif id == Ctrls.DROP:
                     while tetris.move_block(tetris.active_block, displacement=(1, 0)) != -1:
                         pass
+                elif id == Ctrls.ROTATE_CW:
+                    for _ in range(3):
+                        tetris.rotate_block(tetris.active_block)
+                elif id == Ctrls.ROTATE_CCW:
+                    tetris.rotate_block(tetris.active_block)
                 tetris.draw_block(tetris.active_block)
                 
                 sys.stdout.flush()
             
-            if time.time() - last_update > 0.1:
+            if time.time() - last_update > 0.2:
                 tetris.refresh_scene()
                 tetris.print()
                 last_update = time.time()
