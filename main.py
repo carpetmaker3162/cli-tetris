@@ -31,31 +31,6 @@ TEXTURE = {
     8: colored_block(Fmt.gray_highlight_text),
 }
 
-# 0001111000
-
-# 0000110000
-# 0000110000
-
-# 0000100000
-# 0000100000
-# 0000110000
-
-# 0000100000
-# 0000110000
-# 0000010000
-
-# 0000111000
-# 0000010000
-
-# 0 0 0 1 1 1 1 0 0 0
-# 0 0 0 1 1 1 1 0 0 0
-# 0 0 0 1 1 1 1 0 0 0
-# 0 0 0 1 1 1 1 0 0 0
-
-def log(content="", end: str="\n"):
-    with open("debug_logs.txt", "a") as f:
-        f.write(str(content) + end)
-
 BLOCKS = { # first coordinate is centre of block
     0: [(0, 4), (0, 5), (1, 4), (1, 5)], # square
     1: [(0, 4), (0, 3), (0, 5), (0, 6)], # straight

@@ -73,3 +73,7 @@ class Controls:
     RIGHT = ord("d")
     ROTATE_CW = ord("D")
     ROTATE_CCW = ord("A")
+
+def log(content="", end="\n")
+    with open("debug_logs.txt", "a") as f:
+        f.write(str(content) + end)
