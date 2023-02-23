@@ -97,6 +97,14 @@ class Game:
 
     def refresh_scene(self):
         if not self.block_can_fall(self.grid, self.active_block):
+            # check for filled rows
+            r = self.height - 1
+            while r > 0:
+                if all([x != 0 for x in self.grid[r]]):
+                    log("hi")
+                    self.remove_row(r)
+                    continue
+                r -= 1 
             self.active_block = Block(self.next_block.id, self.next_block.color)
             self.next_block = Block.random()
             for br, bc in self.active_block.squares:
@@ -110,6 +118,12 @@ class Game:
             self.draw_block(self.active_block)
         return 0
     
+    def remove_row(self, r: int):
+        for i in range(self.width): # clear the row
+            self.grid[r][i] = 0
+        for i in range(r, 0, -1):
+            self.grid[i] = self.grid[i-1][:]
+
     def move_block(self, block: Block, newpos: list=None, displacement: tuple=(0, 0)):
         dy, dx = displacement
         
@@ -202,7 +216,6 @@ if __name__ == "__main__":
             if event_queue:
                 key = event_queue.pop(0)
                 id = ord(key)
-                curr_blockpos = tetris.active_block.squares
                 if id == 3:
                     break
                 elif id == Ctrls.LEFT:
