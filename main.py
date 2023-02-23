@@ -45,6 +45,10 @@ TEXTURE = {
 # 0000111000
 # 0000010000
 
+def log(content="", end: str="\n"):
+    with open("debug_logs.txt", "a") as f:
+        f.write(str(content) + end)
+
 BLOCKS = {
     0: [(0, 3), (0, 4), (0, 5), (0, 6)], # straight
     1: [(0, 4), (0, 5), (1, 4), (1, 5)], # square
@@ -63,6 +67,7 @@ class Block:
         assert color in range(1, 9)
 
         self.squares = BLOCKS[block]
+        self.id = block
         self.color = color
     
     @classmethod
@@ -80,28 +85,36 @@ class Game:
             self.grid[br][bc] = self.active_block.color
 
     def refresh_scene(self):
-        if self.apply_gravity(self.grid, self.active_block.squares) == -1:
-            for br, bc in self.next_block.squares:
-                self.grid[br][bc] = self.next_block.color
-            self.active_block = self.next_block
+        if not self.block_can_fall(self.grid, self.active_block):
+            #for br, bc in self.next_block.squares:
+            #    self.grid[br][bc] = self.next_block.color
+            self.active_block = Block(self.next_block.id, self.next_block.color)
             self.next_block = Block.random()
+            self.draw_block(self.active_block)
         else:
-            self.grid = self.apply_gravity(self.grid, self.active_block.squares)
-        
-    def apply_gravity(self, grid, active_block): # apply gravity to a grid
-        new_grid = [x[:] for x in grid[:]]
-        new_block = [x[:] for x in active_block[:]]
-        for br, bc in new_block:
+            self.grid = self.apply_gravity(self.grid, self.active_block)
+            self.draw_block(self.active_block)
+    
+    def draw_block(self, block: Block):
+        for br, bc in block.squares:
+            self.grid[br][bc] = block.color
+    
+    def block_can_fall(self, grid, active_block: Block):
+        for br, bc in active_block.squares:
             if br == self.height - 1:
-                return -1
-            elif new_grid[br+1][bc] != 0:
-                return -1
-        
-        for i, block in enumerate(new_block):
+                return False
+            elif grid[br+1][bc] != 0 and all([br > r for r, c in active_block.squares if c == bc and r != br]):
+                return False
+        return True
+
+    def apply_gravity(self, grid, active_block: Block): # apply gravity to a grid
+        new_grid = [x[:] for x in grid[:]]
+        # new_block = [x[:] for x in active_block.squares[:]]
+        for i, block in enumerate(active_block.squares):
             br, bc = block
-            new_block[i][0] += 1
-            new_grid[br+1][bc] = new_grid[br][bc]
             new_grid[br][bc] = 0
+            active_block.squares[i] = (active_block.squares[i][0] + 1, active_block.squares[i][1])
+        
         
         return new_grid
     
@@ -129,7 +142,7 @@ if __name__ == "__main__":
                     break
                 sys.stdout.flush()
             
-            if time.time() - last_update > 1:
+            if time.time() - last_update > 0.05:
                 tetris.refresh_scene()
                 tetris.print()
                 last_update = time.time()
