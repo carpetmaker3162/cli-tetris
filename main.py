@@ -6,6 +6,7 @@ import termios
 import time
 from utils import getch
 from utils import Fmt
+from utils import Controls as Ctrls
 
 WINDOWS = os.name == "nt"
 fd = sys.stdin.fileno()
@@ -96,6 +97,31 @@ class Game:
             self.grid = self.apply_gravity(self.grid, self.active_block)
             self.draw_block(self.active_block)
     
+    def move_block(self, block: Block, newpos: list=None, displacement: tuple=(0, 0)):
+        dy, dx = displacement
+        
+        if newpos is None:
+            new_position = block.squares[:]
+        else:
+            new_position = newpos[:]
+        
+        for i in range(len(new_position)):
+            r, c = new_position[i]
+            new_position[i] = (r+dy, c+dx)
+        
+        for r, c in block.squares:
+            self.grid[r][c] = 0
+        
+        for r, c in new_position:
+            if not 0<=r<self.height and 0<=c<self.width:
+                return -1
+            elif self.grid[r][c] != 0 and (r, c) not in block.squares:
+                return -1
+        
+        
+        block.squares = new_position[:]
+        return 0
+    
     def draw_block(self, block: Block):
         for br, bc in block.squares:
             self.grid[br][bc] = block.color
@@ -136,11 +162,24 @@ if __name__ == "__main__":
         while True:
             if event_queue:
                 key = event_queue.pop(0)
-                if ord(key) == 3:
+                id = ord(key)
+                curr_blockpos = tetris.active_block.squares
+                if id == 3:
                     break
+                elif id == Ctrls.LEFT:
+                    tetris.move_block(tetris.active_block, displacement=(0, -1))
+                elif id == Ctrls.RIGHT:
+                    tetris.move_block(tetris.active_block, displacement=(0, 1))
+                elif id == Ctrls.DOWN:
+                    tetris.move_block(tetris.active_block, displacement=(1, 0))
+                elif id == Ctrls.DROP:
+                    while tetris.move_block(tetris.active_block, displacement=(1, 0)) != -1:
+                        pass
+                tetris.draw_block(tetris.active_block)
+                
                 sys.stdout.flush()
             
-            if time.time() - last_update > 0.05:
+            if time.time() - last_update > 0.1:
                 tetris.refresh_scene()
                 tetris.print()
                 last_update = time.time()

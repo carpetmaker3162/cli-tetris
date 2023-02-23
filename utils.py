@@ -65,3 +65,11 @@ class Fmt:
     magenta_highlight_text = '\033[105m'
     cyan_highlight_text = '\033[106m'
     light_gray_highlight_text = '\033[107m'
+
+class Controls:
+    DROP = ord(" ")
+    LEFT = ord("a")
+    DOWN = ord("s")
+    RIGHT = ord("d")
+    ROTATE_CW = ord("D")
+    ROTATE_CCW = ord("A")
