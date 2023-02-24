@@ -222,10 +222,10 @@ if __name__ == "__main__":
                     while tetris.move_block(tetris.active_block, displacement=(1, 0)) != -1:
                         pass
                 elif key == Ctrls.ROTATE_CW:
-                    tetris.rotate_block(tetris.active_block)
-                elif key == Ctrls.ROTATE_CCW:
                     for i in range(3):
                         tetris.rotate_block(tetris.active_block)
+                elif key == Ctrls.ROTATE_CCW:
+                    tetris.rotate_block(tetris.active_block)
                 tetris.draw_block(tetris.active_block)
                 
                 sys.stdout.flush()
