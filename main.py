@@ -7,7 +7,7 @@ import time
 import math
 from utils import getch
 from utils import Fmt
-from utils import Controls as Ctrls
+from utils import Controls
 
 WINDOWS = os.name == "nt"
 fd = sys.stdin.fileno()
@@ -15,6 +15,15 @@ old_settings = termios.tcgetattr(fd)
 
 event_queue = []
 BLOCK = "  "
+
+LEFT = Controls.LEFT
+RIGHT = Controls.RIGHT
+DOWN = Controls.DOWN
+DROP = Controls.DROP
+ROTATE_CW = Controls.ROTATE_CW
+ROTATE_CCW = Controls.ROTATE_CCW
+
+ACTIONS = (LEFT, RIGHT, DOWN, DROP, ROTATE_CW, ROTATE_CCW)
 
 def colored_block(ansi):
     return f"{ansi}{BLOCK}{Fmt.end}"
@@ -78,7 +87,7 @@ class Game:
         for br, bc in self.active_block.squares:
             self.grid[br][bc] = self.active_block.color
 
-    def refresh_scene(self):
+    def refresh_scene(self, apply_grav: bool=True):
         if not self.block_can_fall(self.grid, self.active_block):
             # check for filled rows
             r = self.height - 1
@@ -99,7 +108,8 @@ class Game:
         else:
             for br, bc in self.active_block.squares:
                 self.grid[br][bc] = 0
-            self.grid = self.apply_gravity(self.grid, self.active_block)
+            if apply_grav:
+                self.grid = self.apply_gravity(self.grid, self.active_block)
             self.draw_block(self.active_block)
         return 0
     
@@ -208,26 +218,33 @@ if __name__ == "__main__":
         tetris = Game()
 
         while True:
+            action_executed = False
             if event_queue:
                 key = event_queue.pop(0)
                 if ord(key) == 3:
                     break
-                elif key == Ctrls.LEFT:
+                elif key == LEFT:
                     tetris.move_block(tetris.active_block, displacement=(0, -1))
-                elif key == Ctrls.RIGHT:
+                elif key == RIGHT:
                     tetris.move_block(tetris.active_block, displacement=(0, 1))
-                elif key == Ctrls.DOWN:
+                elif key == DOWN:
                     tetris.move_block(tetris.active_block, displacement=(1, 0))
-                elif key == Ctrls.DROP:
+                elif key == DROP:
                     while tetris.move_block(tetris.active_block, displacement=(1, 0)) != -1:
                         pass
-                elif key == Ctrls.ROTATE_CW:
+                elif key == ROTATE_CW:
                     for i in range(3):
                         tetris.rotate_block(tetris.active_block)
-                elif key == Ctrls.ROTATE_CCW:
+                elif key == ROTATE_CCW:
                     tetris.rotate_block(tetris.active_block)
-                tetris.draw_block(tetris.active_block)
                 
+                if key in ACTIONS:
+                    status = tetris.refresh_scene(apply_grav=False)
+                    tetris.print()
+                    if status == -1:
+                        break
+                
+                tetris.draw_block(tetris.active_block)
                 sys.stdout.flush()
             
             if time.time() - last_update > 0.4:
