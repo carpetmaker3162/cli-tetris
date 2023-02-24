@@ -22,6 +22,7 @@ DOWN = Controls.DOWN
 DROP = Controls.DROP
 ROTATE_CW = Controls.ROTATE_CW
 ROTATE_CCW = Controls.ROTATE_CCW
+PAUSE = Controls.PAUSE
 
 ACTIONS = (LEFT, RIGHT, DOWN, DROP, ROTATE_CW, ROTATE_CCW)
 
@@ -216,13 +217,18 @@ if __name__ == "__main__":
         thread.start()
 
         tetris = Game()
-
         while True:
-            action_executed = False
             if event_queue:
                 key = event_queue.pop(0)
                 if ord(key) == 3:
                     break
+                elif key == PAUSE:
+                    # i hate myself for writing it like this but i tried other methods and they didnt work so...
+                    while True:
+                        if event_queue:
+                            k = event_queue.pop(0)
+                            if k == PAUSE:
+                                break
                 elif key == LEFT:
                     tetris.move_block(tetris.active_block, displacement=(0, -1))
                 elif key == RIGHT:
