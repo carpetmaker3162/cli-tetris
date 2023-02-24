@@ -238,13 +238,14 @@ if __name__ == "__main__":
                 elif key == ROTATE_CCW:
                     tetris.rotate_block(tetris.active_block)
                 
+                tetris.draw_block(tetris.active_block)
+                
                 if key in ACTIONS:
                     status = tetris.refresh_scene(apply_grav=False)
                     tetris.print()
                     if status == -1:
                         break
                 
-                tetris.draw_block(tetris.active_block)
                 sys.stdout.flush()
             
             if time.time() - last_update > 0.4:
