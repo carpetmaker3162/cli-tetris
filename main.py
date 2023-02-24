@@ -181,13 +181,22 @@ class Game:
         return new_grid
     
     def print(self):
+        # ┌────┐
+        # │    │
+        # └────┘
         print("\033[H", end="\n\r")
         print(self.score, end="\n\r")
         buf = str()
+        buf += "┌" + "─" * self.width * 2 + "┐\n\r"
         for r, row in enumerate(self.grid):
+            buf += "│"
+            
             for c, cell in enumerate(row):
                 buf += TEXTURE[cell]
+            
+            buf += "│"
             buf += "\n\r"
+        buf += "└" + "─" * self.width * 2 + "┘"
         print(buf, end="")
 
 if __name__ == "__main__":
@@ -214,10 +223,10 @@ if __name__ == "__main__":
                     while tetris.move_block(tetris.active_block, displacement=(1, 0)) != -1:
                         pass
                 elif id == Ctrls.ROTATE_CW:
-                    for _ in range(3):
-                        tetris.rotate_block(tetris.active_block)
-                elif id == Ctrls.ROTATE_CCW:
                     tetris.rotate_block(tetris.active_block)
+                elif id == Ctrls.ROTATE_CCW:
+                    for i in range(3):
+                        tetris.rotate_block(tetris.active_block)
                 tetris.draw_block(tetris.active_block)
                 
                 sys.stdout.flush()
@@ -232,5 +241,6 @@ if __name__ == "__main__":
     except Exception as e:
         raise e
     finally:
+        print("\r")
         if not WINDOWS:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
