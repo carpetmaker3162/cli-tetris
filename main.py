@@ -230,7 +230,7 @@ if __name__ == "__main__":
                 
                 sys.stdout.flush()
             
-            if time.time() - last_update > 0.2:
+            if time.time() - last_update > 0.4:
                 status = tetris.refresh_scene()
                 tetris.print()
                 last_update = time.time()
