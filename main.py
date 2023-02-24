@@ -210,21 +210,20 @@ if __name__ == "__main__":
         while True:
             if event_queue:
                 key = event_queue.pop(0)
-                id = ord(key)
-                if id == 3:
+                if ord(key) == 3:
                     break
-                elif id == Ctrls.LEFT:
+                elif key == Ctrls.LEFT:
                     tetris.move_block(tetris.active_block, displacement=(0, -1))
-                elif id == Ctrls.RIGHT:
+                elif key == Ctrls.RIGHT:
                     tetris.move_block(tetris.active_block, displacement=(0, 1))
-                elif id == Ctrls.DOWN:
+                elif key == Ctrls.DOWN:
                     tetris.move_block(tetris.active_block, displacement=(1, 0))
-                elif id == Ctrls.DROP:
+                elif key == Ctrls.DROP:
                     while tetris.move_block(tetris.active_block, displacement=(1, 0)) != -1:
                         pass
-                elif id == Ctrls.ROTATE_CW:
+                elif key == Ctrls.ROTATE_CW:
                     tetris.rotate_block(tetris.active_block)
-                elif id == Ctrls.ROTATE_CCW:
+                elif key == Ctrls.ROTATE_CCW:
                     for i in range(3):
                         tetris.rotate_block(tetris.active_block)
                 tetris.draw_block(tetris.active_block)

@@ -1,0 +1,6 @@
+drop: ' '
+left: 'a'
+down: 's'
+right: 'd'
+rotate_cw: 'D'
+rotate_ccw: 'A'

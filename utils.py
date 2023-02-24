@@ -1,4 +1,8 @@
 import os
+import yaml
+
+with open("controls.yaml", encoding="UTF-8") as f:
+    parsed_yaml = yaml.safe_load(f)
 
 def _unix_getch():
     fd = sys.stdin.fileno()
@@ -66,13 +70,13 @@ class Fmt:
     cyan_highlight_text = '\033[106m'
     light_gray_highlight_text = '\033[107m'
 
-class Controls:
-    DROP = ord(" ")
-    LEFT = ord("a")
-    DOWN = ord("s")
-    RIGHT = ord("d")
-    ROTATE_CW = ord("D")
-    ROTATE_CCW = ord("A")
+class yamlgetter(type):
+    def __getattr__(self, name):
+        name = name.lower()
+        return parsed_yaml[name]
+
+class Controls(metaclass=yamlgetter):
+    pass
 
 def log(content="", end="\n"):
     with open("debug_logs.txt", "a") as f:
