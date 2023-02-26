@@ -14,8 +14,8 @@ fd = sys.stdin.fileno()
 old_settings = termios.tcgetattr(fd)
 
 event_queue = []
-BLOCK = "  "
 
+BLOCK = "  "
 LEFT = Controls.LEFT
 RIGHT = Controls.RIGHT
 DOWN = Controls.DOWN
@@ -24,7 +24,7 @@ ROTATE_CW = Controls.ROTATE_CW
 ROTATE_CCW = Controls.ROTATE_CCW
 PAUSE = Controls.PAUSE
 
-ACTIONS = (LEFT, RIGHT, DOWN, DROP, ROTATE_CW, ROTATE_CCW)
+ACTIONS = [LEFT, RIGHT, DOWN, DROP, ROTATE_CW, ROTATE_CCW]
 
 def colored_block(ansi):
     return f"{ansi}{BLOCK}{Fmt.end}"
@@ -196,7 +196,7 @@ class Game:
         # │    │
         # └────┘
         print("\033[H", end="\n\r")
-        print(self.score, end="\n\r")
+        print("Score:", self.score, end="\n\r")
         buf = str()
         buf += "┌" + "─" * self.width * 2 + "┐\n\r"
         for r, row in enumerate(self.grid):
@@ -220,15 +220,18 @@ if __name__ == "__main__":
         while True:
             if event_queue:
                 key = event_queue.pop(0)
-                if ord(key) == 3:
-                    break
-                elif key == PAUSE:
+                if key == PAUSE:
                     # i hate myself for writing it like this but i tried other methods and they didnt work so...
                     while True:
                         if event_queue:
                             k = event_queue.pop(0)
                             if k == PAUSE:
                                 break
+                            elif ord(k) == 3:
+                                key = "\x03"
+                                break
+                if ord(key) == 3:
+                    break 
                 elif key == LEFT:
                     tetris.move_block(tetris.active_block, displacement=(0, -1))
                 elif key == RIGHT:
