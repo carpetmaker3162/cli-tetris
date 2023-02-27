@@ -1,7 +1,7 @@
 # tetris
 cli tetris  
 
-![tetris_example](https://user-images.githubusercontent.com/82886347/221628803-3a7b3344-ddeb-4da6-b238-f29998b521d6.png)  
+![tetris_example](https://user-images.githubusercontent.com/82886347/221628983-52d7eb3c-96e7-4432-ab89-d34311a395ba.png)
 
 visit `controls.yaml` to change controls  
 
