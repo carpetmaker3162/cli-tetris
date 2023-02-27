@@ -22,12 +22,12 @@ class Screen:
     
     def draw(self, x: int, y: int, object: Object):
         posy = y
-        while posy < y + len(object.matrix):
+        while posy < y + object.height:
             posx = x
             ptrx = posx
-            while posx < x + len(object.matrix[posy - y]):
+            while posx < x + object.width:
                 px = object.matrix[posy - y][posx - x]
-                fill = object.texture.get(px, "?")
+                fill = object.texture.get(px, str(px))
                 self.matrix[posy + object.border][ptrx + object.border : ptrx + object.pixel_size + object.border] = fill
                 posx += 1
                 ptrx += object.pixel_size

@@ -4,7 +4,7 @@ import random
 import os
 import termios
 import time
-from utils import getch
+from utils import getch, log
 from utils import Fmt, Controls, ANSI
 from screen import Screen, Object
 
@@ -174,6 +174,7 @@ class Game:
     
     def draw_block(self, block: Block):
         self.grid_obj = Object(self.grid, TEXTURE, pixel_size=2, border=True)
+        self.score_obj = Object([[*str(self.score)]], {}, pixel_size=1)
         for br, bc in block.squares:
             self.grid[br][bc] = block.color
     
@@ -193,10 +194,8 @@ class Game:
         return new_grid
     
     def print(self):
-        # ┌────┐
-        # │    │
-        # └────┘
-        self.screen.draw(0, 0, self.grid_obj)
+        self.screen.draw(0, 0, self.score_obj)
+        self.screen.draw(0, 1, self.grid_obj)
         self.screen.display()
         
 if __name__ == "__main__":
