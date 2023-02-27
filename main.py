@@ -40,6 +40,7 @@ TEXTURE = {
     8: colored_block(Fmt.gray_highlight_text),
 }
 
+# initial positions that the blocks occupy
 BLOCKS = { # first coordinate is centre of block
     0: [(0, 4), (0, 5), (1, 4), (1, 5)], # square
     1: [(0, 4), (0, 3), (0, 5), (0, 6)], # straight
@@ -48,6 +49,7 @@ BLOCKS = { # first coordinate is centre of block
     4: [(0, 5), (0, 4), (0, 6), (1, 5)], # T
 }
 
+# amount of points given for # of new rows cleared after a block is placed
 POINTS_GIVEN = {
     1: 40,
     2: 100,
@@ -64,8 +66,8 @@ class Block:
         assert block in range(0, 5)
         assert color in range(1, 9)
 
-        self.squares = BLOCKS[block][:]
-        self.id = block
+        self.squares = BLOCKS[block][:] # squares that the block occupies
+        self.type = block
         self.color = color
         self.centre = self.squares[0]
     
@@ -77,15 +79,13 @@ class Block:
         self.centre = self.squares[0]
     
     def as_matrix(self):
+        # draw the block onto a small 5x5 matrix and return it
         minx = min([x[1] for x in self.squares])
-        maxx = max([x[1] for x in self.squares])
         miny = min([x[0] for x in self.squares])
-        maxy = max([x[0] for x in self.squares])
         self.localspace_squares = self.squares[:]
         for i, sq in enumerate(self.localspace_squares):
             y, x = sq
             self.localspace_squares[i] = (x - minx, y - miny)
-        # matrix = [[0 for i in range(maxx-minx+1)] for i in range(maxy-miny+1)]
         matrix = [[0 for i in range(5)] for i in range(5)]
         for y, x in self.localspace_squares:
             matrix[x+1][y+1] = self.color
@@ -96,13 +96,16 @@ class Game:
         self.width = 10
         self.height = 20
         self.grid = [[0 for i in range(self.width)] for i in range(self.height)]
-        self.active_block = Block.random() # collection of row #'s and col #'s
+        self.active_block = Block.random()
         self.next_block = Block.random()
         self.score = 0
+        
+        # draw the first block
         for br, bc in self.active_block.squares:
             self.grid[br][bc] = self.active_block.color
         
         w, h = os.get_terminal_size()
+        # h-2 to leave space for terminal bottom and the invokation line
         self.screen = Screen(w, h-2, default_fill=" ")
 
     def refresh_scene(self, apply_grav: bool=True):
@@ -111,28 +114,36 @@ class Game:
             r = self.height - 1
             rows_cleared = 0
             while r > 0:
+                # if entire row is filled
                 if all([x != 0 for x in self.grid[r]]):
                     rows_cleared += 1
                     self.remove_row(r)
                     continue
-                r -= 1 
+                r -= 1
             self.score += POINTS_GIVEN.get(rows_cleared, 0)
-            self.active_block = Block(self.next_block.id, self.next_block.color)
+            # the active block is now what was previously the next block
+            self.active_block = Block(self.next_block.type, self.next_block.color)
             self.next_block = Block.random()
+            # check for game end (if the spawned block's position is already occupied by another 
+            # square, it means the game is over as blocks have reached the ceiling)
             for br, bc in self.active_block.squares:
                 if self.grid[br][bc] != 0:
                     return -1
         else:
+            # erase the current block (and re-draw it later)
             for br, bc in self.active_block.squares:
                 self.grid[br][bc] = 0
+            # apply gravity if the block can fall
             if apply_grav:
                 self.grid = self.apply_gravity(self.grid, self.active_block)
         self.draw_block(self.active_block)
         return 0
     
     def remove_row(self, r: int):
-        for i in range(self.width): # clear the row
+        # clear the row
+        for i in range(self.width):
             self.grid[r][i] = 0
+        # shift everything above down by 1
         for i in range(r, 0, -1):
             self.grid[i] = self.grid[i-1][:]
 
@@ -188,17 +199,36 @@ class Game:
         return 0
     
     def draw_block(self, block: Block):
-        self.next_block_obj = Object(self.next_block.as_matrix(), TEXTURE, pixel_size=2, border=True)
-        self.grid_obj = Object(self.grid, TEXTURE, pixel_size=2, border=True)
-        self.score_obj = Object([[*str(self.score)]], {}, pixel_size=1)
+        # update the objects on the screen
+        self.next_block_obj = Object(
+            self.next_block.as_matrix(),
+            TEXTURE,
+            pixel_size=2,
+            border=True)
+        
+        self.grid_obj = Object(
+            self.grid,
+            TEXTURE,
+            pixel_size=2,
+            border=True)
+        
+        self.score_obj = Object(
+            [[*str(self.score)]], # quick and lazy and unreadable way of converting a string into "matrix" format
+            {},
+            pixel_size=1)
+        
+        # draw the block on the grid
         for br, bc in block.squares:
             self.grid[br][bc] = block.color
     
     def block_can_fall(self, grid, block: Block):
         for br, bc in block.squares:
+            on_bottom_of_block = all([br > r for r, c in block.squares if c == bc and r != br])
+            # if block has reached the bottom of the screen
             if br == self.height - 1:
                 return False
-            elif grid[br+1][bc] != 0 and all([br > r for r, c in block.squares if c == bc and r != br]):
+            # if block below square is occupied and the square is on the bottom of the block
+            elif grid[br+1][bc] != 0 and on_bottom_of_block:
                 return False
         return True
 
@@ -221,6 +251,8 @@ class Game:
 if __name__ == "__main__":
     try:
         last_update = 0
+
+        # start a separate thread for processing keyboard events
         thread = threading.Thread(target=process_keyboard_events, args=(event_queue,), daemon=True)
         thread.start()
 
@@ -254,8 +286,7 @@ if __name__ == "__main__":
                 elif key == ROTATE_CCW:
                     tetris.rotate_block(tetris.active_block)
                 
-                tetris.draw_block(tetris.active_block)
-                
+                # re-print the screen right after a keyboard event is registered
                 if key in ACTIONS:
                     status = tetris.refresh_scene(apply_grav=False)
                     tetris.print()
@@ -264,6 +295,7 @@ if __name__ == "__main__":
                 
                 sys.stdout.flush()
             
+            # apply gravity every 0.4 seconds
             if time.time() - last_update > 0.4:
                 status = tetris.refresh_scene()
                 tetris.print()

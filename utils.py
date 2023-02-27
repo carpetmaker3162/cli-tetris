@@ -5,6 +5,10 @@ with open("controls.yaml", encoding="UTF-8") as f:
     parsed_yaml = yaml.safe_load(f)
 
 def _unix_getch():
+    """
+    Read a single character of input from stdin without the need of pressing ENTER, without printing
+    the inputted character out on the screen
+    """
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
     try:
@@ -15,6 +19,9 @@ def _unix_getch():
     return ch
 
 def _win_getch():
+    """
+    Same as _unix_getch() but for Windows
+    """
     return msvcrt.getch()
 
 if os.name == "nt":
@@ -72,6 +79,7 @@ class Fmt:
 
 class ANSI:
     def __init__(self, ansi, text: str) -> None:
+        """Custom color formatting class"""
         self.ansi = ansi
         self.text = text
         self.n = 0
@@ -86,6 +94,10 @@ class ANSI:
         return len(self.text)
     
     def __next__(self):
+        """
+        define custom behaviour for iteration so that format doesn't get messed up when this is 
+        assigned to a slice in the matrix
+        """
         length = len(self)
         if self.n == length:
             raise StopIteration
