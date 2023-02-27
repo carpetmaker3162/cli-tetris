@@ -29,13 +29,3 @@ class Screen:
                 posx += 1
                 ptrx += pxwidth
             posy += 1
-
-if __name__ == "__main__":
-    import random
-    import os
-    # test
-    w, h = os.get_terminal_size()
-    screen = Screen(w, h-2, " ")
-    object = Object([[random.choice((1, 2)) for i in range(10)] for i in range(5)], {1: "()", 2: "[]"})
-    screen.draw(20, 15, object)
-    screen.display()

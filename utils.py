@@ -117,8 +117,3 @@ class Controls(metaclass=yamlgetter):
 def log(content="", end="\n"):
     with open("debug_logs.txt", "a") as f:
         f.write(str(content) + end)
-
-if __name__ == "__main__":
-    a = ANSI(Fmt.red_text, "ab")
-    for i in a:
-        print(i)
