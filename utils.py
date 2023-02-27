@@ -70,6 +70,42 @@ class Fmt:
     cyan_highlight_text = '\033[106m'
     light_gray_highlight_text = '\033[107m'
 
+class ANSI:
+    def __init__(self, ansi, text: str) -> None:
+        self.ansi = ansi
+        self.text = text
+        self.n = 0
+    
+    def __str__(self) -> str:
+        return self.text
+
+    def __repr__(self) -> str:
+        return f"{self.ansi}{self.text}{Fmt.end}"
+    
+    def __len__(self) -> int:
+        return len(self.text)
+    
+    def __next__(self):
+        length = len(self)
+        if self.n == length:
+            raise StopIteration
+        if length == 1:
+            return repr(self)
+        else:
+            if self.n == 0:
+                self.n += 1
+                return self.ansi + self.text[0]
+            elif self.n == length - 1:
+                self.n += 1
+                return self.text[-1] + Fmt.end
+            else:
+                self.n += 1
+                return self.text[self.n]
+    
+    def __iter__(self):
+        self.n = 0
+        return self
+
 class yamlgetter(type):
     def __getattr__(self, name):
         name = name.lower()
@@ -81,3 +117,8 @@ class Controls(metaclass=yamlgetter):
 def log(content="", end="\n"):
     with open("debug_logs.txt", "a") as f:
         f.write(str(content) + end)
+
+if __name__ == "__main__":
+    a = ANSI(Fmt.red_text, "ab")
+    for i in a:
+        print(i)

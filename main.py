@@ -4,10 +4,9 @@ import random
 import os
 import termios
 import time
-import math
 from utils import getch
-from utils import Fmt
-from utils import Controls
+from utils import Fmt, Controls, ANSI
+from screen import Screen, Object
 
 WINDOWS = os.name == "nt"
 fd = sys.stdin.fileno()
@@ -27,7 +26,7 @@ PAUSE = Controls.PAUSE
 ACTIONS = [LEFT, RIGHT, DOWN, DROP, ROTATE_CW, ROTATE_CCW]
 
 def colored_block(ansi):
-    return f"{ansi}{BLOCK}{Fmt.end}"
+    return ANSI(ansi, BLOCK)
 
 TEXTURE = {
     0: ". ",
@@ -87,6 +86,10 @@ class Game:
         self.score = 0
         for br, bc in self.active_block.squares:
             self.grid[br][bc] = self.active_block.color
+        
+        w, h = os.get_terminal_size()
+        self.screen = Screen(w, h-2, default_fill=" ")
+        self.grid_obj = Object(self.grid, TEXTURE)
 
     def refresh_scene(self, apply_grav: bool=True):
         if not self.block_can_fall(self.grid, self.active_block):
@@ -105,13 +108,12 @@ class Game:
             for br, bc in self.active_block.squares:
                 if self.grid[br][bc] != 0:
                     return -1
-            self.draw_block(self.active_block)
         else:
             for br, bc in self.active_block.squares:
                 self.grid[br][bc] = 0
             if apply_grav:
                 self.grid = self.apply_gravity(self.grid, self.active_block)
-            self.draw_block(self.active_block)
+        self.draw_block(self.active_block)
         return 0
     
     def remove_row(self, r: int):
@@ -172,6 +174,7 @@ class Game:
         return 0
     
     def draw_block(self, block: Block):
+        self.grid_obj = Object(self.grid, TEXTURE)
         for br, bc in block.squares:
             self.grid[br][bc] = block.color
     
@@ -192,24 +195,9 @@ class Game:
         return new_grid
     
     def print(self):
-        # ┌────┐
-        # │    │
-        # └────┘
-        print("\033[H", end="\n\r")
-        print("Score:", self.score, end="\n\r")
-        buf = str()
-        buf += "┌" + "─" * self.width * 2 + "┐\n\r"
-        for r, row in enumerate(self.grid):
-            buf += "│"
-            
-            for c, cell in enumerate(row):
-                buf += TEXTURE[cell]
-            
-            buf += "│"
-            buf += "\n\r"
-        buf += "└" + "─" * self.width * 2 + "┘"
-        print(buf, end="")
-
+        self.screen.draw(0, 0, self.grid_obj)
+        self.screen.display()
+        
 if __name__ == "__main__":
     try:
         last_update = 0
