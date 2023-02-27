@@ -75,6 +75,21 @@ class Block:
     
     def update_centre(self):
         self.centre = self.squares[0]
+    
+    def as_matrix(self):
+        minx = min([x[1] for x in self.squares])
+        maxx = max([x[1] for x in self.squares])
+        miny = min([x[0] for x in self.squares])
+        maxy = max([x[0] for x in self.squares])
+        self.localspace_squares = self.squares[:]
+        for i, sq in enumerate(self.localspace_squares):
+            y, x = sq
+            self.localspace_squares[i] = (x - minx, y - miny)
+        # matrix = [[0 for i in range(maxx-minx+1)] for i in range(maxy-miny+1)]
+        matrix = [[0 for i in range(5)] for i in range(5)]
+        for y, x in self.localspace_squares:
+            matrix[x+1][y+1] = self.color
+        return matrix
 
 class Game:
     def __init__(self) -> None:
@@ -173,6 +188,7 @@ class Game:
         return 0
     
     def draw_block(self, block: Block):
+        self.next_block_obj = Object(self.next_block.as_matrix(), TEXTURE, pixel_size=2, border=True)
         self.grid_obj = Object(self.grid, TEXTURE, pixel_size=2, border=True)
         self.score_obj = Object([[*str(self.score)]], {}, pixel_size=1)
         for br, bc in block.squares:
@@ -194,8 +210,12 @@ class Game:
         return new_grid
     
     def print(self):
+        self.next_block_label = Object([[*"Next"]], {}, pixel_size=1)
         self.screen.draw(0, 0, self.score_obj)
         self.screen.draw(0, 1, self.grid_obj)
+        # self.width * 2 because each block is 2 chars long on the screen
+        self.screen.draw(self.width * 2 + 3, 2, self.next_block_obj)
+        self.screen.draw(self.width * 2 + 7, 1, self.next_block_label)
         self.screen.display()
         
 if __name__ == "__main__":
