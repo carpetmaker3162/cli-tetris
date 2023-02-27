@@ -22,7 +22,7 @@ def _win_getch():
     """
     Same as _unix_getch() but for Windows
     """
-    return msvcrt.getch()
+    return msvcrt.getch().decode("utf-8")
 
 if os.name == "nt":
     import msvcrt

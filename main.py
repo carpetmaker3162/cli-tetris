@@ -288,6 +288,8 @@ if __name__ == "__main__":
                 elif key == ROTATE_CCW:
                     tetris.rotate_block(tetris.active_block)
                 
+                tetris.draw_block(tetris.active_block)
+                
                 # re-print the screen right after a keyboard event is registered
                 if key in ACTIONS:
                     status = tetris.refresh_scene(apply_grav=False)
