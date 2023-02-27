@@ -2,13 +2,16 @@ import sys
 import threading
 import random
 import os
-import termios
 import time
 from utils import getch, log
 from utils import Fmt, Controls, ANSI
 from screen import Screen, Object
 
 WINDOWS = os.name == "nt"
+
+if not WINDOWS:
+    import termios
+
 fd = sys.stdin.fileno()
 old_settings = termios.tcgetattr(fd)
 
