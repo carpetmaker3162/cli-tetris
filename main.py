@@ -11,9 +11,8 @@ WINDOWS = os.name == "nt"
 
 if not WINDOWS:
     import termios
-
-fd = sys.stdin.fileno()
-old_settings = termios.tcgetattr(fd)
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
 
 event_queue = []
 
