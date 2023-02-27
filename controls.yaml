@@ -1,4 +1,4 @@
-drop: ' '
+drop: ' ' # space
 left: 'a'
 down: 's'
 right: 'd'

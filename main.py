@@ -89,7 +89,6 @@ class Game:
         
         w, h = os.get_terminal_size()
         self.screen = Screen(w, h-2, default_fill=" ")
-        self.grid_obj = Object(self.grid, TEXTURE)
 
     def refresh_scene(self, apply_grav: bool=True):
         if not self.block_can_fall(self.grid, self.active_block):
@@ -174,7 +173,7 @@ class Game:
         return 0
     
     def draw_block(self, block: Block):
-        self.grid_obj = Object(self.grid, TEXTURE)
+        self.grid_obj = Object(self.grid, TEXTURE, pixel_size=2, border=True)
         for br, bc in block.squares:
             self.grid[br][bc] = block.color
     
@@ -188,13 +187,15 @@ class Game:
 
     def apply_gravity(self, grid, block: Block): # apply gravity to a grid
         new_grid = [x[:] for x in grid[:]]
-        # new_block = [x[:] for x in active_block.squares[:]]
         for i, _ in enumerate(block.squares):
             block.squares[i] = (block.squares[i][0] + 1, block.squares[i][1])
         block.update_centre()
         return new_grid
     
     def print(self):
+        # ┌────┐
+        # │    │
+        # └────┘
         self.screen.draw(0, 0, self.grid_obj)
         self.screen.display()
         
@@ -209,14 +210,13 @@ if __name__ == "__main__":
             if event_queue:
                 key = event_queue.pop(0)
                 if key == PAUSE:
-                    # i hate myself for writing it like this but i tried other methods and they didnt work so...
                     while True:
                         if event_queue:
                             k = event_queue.pop(0)
                             if k == PAUSE:
                                 break
                             elif ord(k) == 3:
-                                key = "\x03"
+                                key = "\x03" # lmao
                                 break
                 if ord(key) == 3:
                     break 
