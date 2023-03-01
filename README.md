@@ -7,6 +7,8 @@ visit `controls.yaml` to change controls
 
 since i didnt use any external libraries to assist with drawing things with CLI, you might find this code a bit hard to read  
 
+warning: if your terminal size is too small it will raise IndexError and crash (to be fixed later)  
+
 **to play:**  
 
 if you have git:  
