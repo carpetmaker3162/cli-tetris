@@ -38,17 +38,19 @@ TEXTURE = {
     4: colored_block(Fmt.cyan_highlight_text),
     5: colored_block(Fmt.blue_highlight_text),
     6: colored_block(Fmt.magenta_highlight_text),
-    7: colored_block(Fmt.light_gray_highlight_text),
-    8: colored_block(Fmt.gray_highlight_text),
+    7: colored_block(Fmt.gray_highlight_text),
+    8: colored_block(Fmt.light_gray_highlight_text),
 }
 
 # initial positions that the blocks occupy
 BLOCKS = { # first coordinate is centre of block
-    0: [(0, 4), (0, 5), (1, 4), (1, 5)], # square
-    1: [(0, 4), (0, 3), (0, 5), (0, 6)], # straight
-    2: [(1, 4), (0, 4), (2, 4), (2, 5)], # L
-    3: [(1, 5), (0, 4), (1, 4), (2, 5)], # skew
-    4: [(0, 5), (0, 4), (0, 6), (1, 5)], # T
+    1: [(0, 4), (0, 5), (1, 4), (1, 5)], # square
+    2: [(0, 4), (0, 3), (0, 5), (0, 6)], # straight
+    3: [(1, 4), (0, 4), (2, 4), (2, 5)], # L
+    4: [(1, 5), (0, 5), (2, 5), (2, 4)], # L
+    5: [(1, 5), (0, 4), (1, 4), (2, 5)], # skew
+    6: [(1, 4), (0, 5), (1, 5), (2, 4)], # skew
+    7: [(0, 5), (0, 4), (0, 6), (1, 5)], # T
 }
 
 # amount of points given for # of new rows cleared after a block is placed
@@ -65,9 +67,6 @@ def process_keyboard_events(q):
 
 class Block:
     def __init__(self, block: int, color: int) -> None:
-        assert block in range(0, 5)
-        assert color in range(1, 9)
-
         self.squares = BLOCKS[block][:] # squares that the block occupies
         self.type = block
         self.color = color
@@ -75,7 +74,8 @@ class Block:
     
     @classmethod
     def random(cls):
-        return cls(random.randrange(0, 5), random.randrange(1, 9))
+        choice = random.randrange(1, 8)
+        return cls(choice, choice)
     
     def update_centre(self):
         self.centre = self.squares[0]
@@ -149,7 +149,7 @@ class Game:
         for i in range(r, 0, -1):
             self.grid[i] = self.grid[i-1][:]
 
-    def move_block(self, block: Block, newpos: list=None, displacement: tuple=(0, 0)):
+    def move_block(self, block: Block, newpos: list=None, displacement: tuple=(0, 0), **k):
         dy, dx = displacement
         
         if newpos is None:

@@ -121,10 +121,13 @@ class ANSI:
 class yamlgetter(type):
     def __getattr__(self, name):
         name = name.lower()
-        return parsed_yaml[name]
+        return self.data.get(name, None)
+    
+    def __getitem__(self, name):
+        return self.__getattr__(name)
 
 class Controls(metaclass=yamlgetter):
-    pass
+    data = parsed_yaml
 
 def log(content="", end="\n"):
     with open("debug_logs.txt", "a") as f:
